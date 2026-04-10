@@ -1,0 +1,50 @@
+package com.nova.approve.products.service.service.scheduler;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import com.nova.approve.products.service.client.ProductProviderSync;
+import com.nova.approve.products.service.model.Product;
+import com.nova.approve.products.service.repository.ProductRepository;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+@AllArgsConstructor
+@Slf4j
+public class InventorySyncScheduler {
+
+    private final List<ProductProviderSync> providers;
+    private final ProductRepository productRepository;
+
+    @Scheduled(fixedDelay = 600000)
+    public void syncInventory() {
+        log.info("Execute Cron save products");
+        
+        try {
+            List<CompletableFuture<List<Product>>> futures = providers.stream()
+                    .map(provider -> CompletableFuture.supplyAsync(() -> {
+                        try {
+                            return provider.fetchAndMap();
+                        } catch (Exception e) {
+                            log.error("Provider failed: " + e.getMessage());
+                            return List.<Product>of();
+                        }
+                    }))
+                    .toList();
+
+            List<Product> products = futures.stream()
+                    .map(CompletableFuture::join)
+                    .flatMap(List::stream)
+                    .toList();
+
+            productRepository.saveAll(products);
+
+            log.info("Sync completed: " + products.size());
+
+        } catch (Exception e) {
+            log.error("Global sync error: " + e.getMessage());
+        }
+    }
+}
