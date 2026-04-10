@@ -5,15 +5,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.nova.approve.products.service.client.ExternalApiClient;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import com.nova.approve.products.service.client.providera.ProductADTO;
-import com.nova.approve.products.service.client.providerb.ProductBDTO;
-import com.nova.approve.products.service.client.providerb.ProductsBDTO;
 import com.nova.approve.products.service.config.ProvidersProperties;
+import com.nova.approve.products.service.infrastructure.client.http.ExternalApiClient;
+import com.nova.approve.products.service.infrastructure.client.providera.ProductADTO;
+import com.nova.approve.products.service.infrastructure.client.providerb.ProductBDTO;
+import com.nova.approve.products.service.infrastructure.client.providerb.ProductsBDTO;
 
 @Service
 @AllArgsConstructor

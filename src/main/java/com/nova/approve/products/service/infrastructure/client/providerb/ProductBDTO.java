@@ -1,4 +1,4 @@
-package com.nova.approve.products.service.client.providerb;
+package com.nova.approve.products.service.infrastructure.client.providerb;
 
 public record ProductBDTO(
     Long id,

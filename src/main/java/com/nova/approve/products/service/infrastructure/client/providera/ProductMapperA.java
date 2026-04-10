@@ -1,4 +1,4 @@
-package com.nova.approve.products.service.client.providera;
+package com.nova.approve.products.service.infrastructure.client.providera;
 
 import org.springframework.stereotype.Component;
 

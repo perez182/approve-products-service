@@ -4,9 +4,11 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import com.nova.approve.products.service.client.ProductProviderSync;
+
+import com.nova.approve.products.service.infrastructure.client.ProductProviderSync;
+import com.nova.approve.products.service.infrastructure.repository.ProductRepository;
 import com.nova.approve.products.service.model.Product;
-import com.nova.approve.products.service.repository.ProductRepository;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

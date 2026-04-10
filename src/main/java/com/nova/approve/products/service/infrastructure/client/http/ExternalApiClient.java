@@ -1,4 +1,4 @@
-package com.nova.approve.products.service.client;
+package com.nova.approve.products.service.infrastructure.client.http;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;

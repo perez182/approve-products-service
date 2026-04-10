@@ -1,4 +1,4 @@
-package com.nova.approve.products.service.client;
+package com.nova.approve.products.service.infrastructure.client;
 
 import java.util.List;
 

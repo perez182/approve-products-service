@@ -1,4 +1,4 @@
-package com.nova.approve.products.service.repository;
+package com.nova.approve.products.service.infrastructure.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

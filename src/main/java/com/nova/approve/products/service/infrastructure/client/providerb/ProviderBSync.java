@@ -1,11 +1,11 @@
-package com.nova.approve.products.service.client.providerb;
+package com.nova.approve.products.service.infrastructure.client.providerb;
 
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.nova.approve.products.service.client.ProductProviderSync;
 import com.nova.approve.products.service.service.InventoryService;
+import com.nova.approve.products.service.infrastructure.client.ProductProviderSync;
 import com.nova.approve.products.service.model.Product;
 
 @Component
