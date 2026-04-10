@@ -39,12 +39,25 @@ public class InventorySyncScheduler {
                     .flatMap(List::stream)
                     .toList();
 
+            auditZeroStockProducts(products);      
             productRepository.saveAll(products);
 
             log.info("Sync completed: " + products.size());
-
         } catch (Exception e) {
             log.error("Global sync error: " + e.getMessage());
         }
     }
+
+    private void auditZeroStockProducts(List<Product> products) {
+        long zeroStockCount = products.stream()
+                .filter(p -> Integer.valueOf(0).equals(p.getStock()))
+                .peek(p -> log.warn("product_stock_zero name={} provider={} stock={}",
+                        p.getName(),
+                        p.getProvider(),
+                        p.getStock()))
+                .count();
+
+        log.info("Zero stock products count={}", zeroStockCount);
+    }
+
 }
