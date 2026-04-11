@@ -9,8 +9,8 @@ public class ProductMapperB {
     public Product fromProviderB(ProductBDTO dto) {
 
         Product product = new Product();
-
-        product.setId(null); 
+        product.setId(null);
+        product.setExternalId("P2_"+dto.id()); 
 
         product.setName(dto.title());
         product.setPrice(dto.price());
@@ -24,6 +24,8 @@ public class ProductMapperB {
         product.setCategory(dto.category());
 
         product.setBrand(null);
+
+        product.setImage(dto.images().size()>0?dto.images().get(0):null);
 
         return product;
     }

@@ -1,5 +1,7 @@
 package com.nova.approve.products.service.infrastructure.client.providerb;
 
+import java.util.List;
+
 public record ProductBDTO(
     Long id,
     String title,
@@ -8,5 +10,6 @@ public record ProductBDTO(
     Double price,
     Double discountPercentage,
     Double rating,
-    Integer stock
+    Integer stock,
+    List<String> images
 ) {}

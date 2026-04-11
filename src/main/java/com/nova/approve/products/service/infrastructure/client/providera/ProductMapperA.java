@@ -10,7 +10,8 @@ public class ProductMapperA {
     public Product fromProviderA(ProductADTO dto) {
 
         Product product = new Product();
-        product.setId(null); 
+        product.setId(null);
+        product.setExternalId("P1_"+dto.id()); 
 
         product.setName(dto.title());
         product.setPrice(dto.price());
@@ -22,7 +23,7 @@ public class ProductMapperA {
         product.setProvider("providerA");
         product.setCategory(dto.category());
         product.setBrand(null);
-
+        product.setImage(dto.image());
         return product;
     }
     

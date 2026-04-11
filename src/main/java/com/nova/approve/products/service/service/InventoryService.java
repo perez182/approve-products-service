@@ -31,7 +31,7 @@ public class InventoryService {
             externalApiClient.get(providers.getProviderA(), ProductADTO[].class);
         return Arrays.asList(response);
         } catch (Exception e) {
-            log.error("Provider A failed", e);
+            log.error("Provider A failed", e.getMessage());
             return List.of(); 
         }
 
@@ -43,7 +43,7 @@ public class InventoryService {
                     externalApiClient.get(providers.getProviderB(), ProductsBDTO.class);
             return response.products();
         } catch (Exception e) {
-            log.error("Provider A failed", e);
+            log.error("Provider B failed", e.getMessage());
             return List.of(); 
         }
     }

@@ -10,6 +10,7 @@ public class ProductMapperDTO {
      public ProductResponseDTO toResponse(Product p) {
             return new ProductResponseDTO(
                     p.getId(),
+                    p.getExternalId(),
                     p.getName(),
                     p.getPrice(),
                     p.getRating(),
