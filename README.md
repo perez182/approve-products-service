@@ -1,96 +1,67 @@
-# Approve Products Service
+# Product Inventory Service
 
-A Spring Boot microservice designed to aggregate and synchronize product inventory from multiple external providers into a centralized PostgreSQL database.
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-*   **Maven** 3.8+ (for building the project)
-*   **Docker** and **Docker Compose**
-*   **Java 17**
-
-### Running with Docker
-
-1.  **Build the application JAR:**
-    ```bash
-    ./mvnw clean package -DskipTests
-    ```
-    *Note: Use `mvnw.cmd` on Windows.*
-
-2.  **Spin up the infrastructure (PostgreSQL + Application):**
-    ```bash
-    docker-compose up --build
-    ```
-
-3.  **Access the Application:**
-    *   API: `http://localhost:8080/products`
-    *   Swagger UI: `http://localhost:8080/swagger-ui.html`
+This service manages a centralized inventory by aggregating product data from multiple external providers. It includes an automated synchronization engine and a flexible search API.
 
 ---
 
-## 🏗️ Architecture
+## Getting Started (Docker)
 
-The project follows a **Layered Architecture** with elements of **Clean Architecture** to maintain a clear separation of concerns.
+To run the application and its PostgreSQL database locally:
 
-### Diagram
+1. **Build the application JAR:**
+   ```bash
+   ./mvnw clean package -DskipTests
+   ```
+2. **Start the containers:**
+   ```bash
+   docker-compose up --build
+   ```
+
+*   **API Base URL:** `http://localhost:8080`
+*   **API Documentation (Swagger):** `http://localhost:8080/swagger-ui/index.html`
+
+---
+
+## Architectural Overview
+
+The project follows a layered architecture to ensure a clean separation between external integrations and internal business logic.
+
+### High-Level Flow
 ```text
-[ Client (Browser/Postman) ]
-            |
-            V
-[ API Layer (Controllers, DTOs, Mappers) ]
-            |
-            V
-[ Service Layer (Business Logic, Search, Sync Logic) ] <--- [ Scheduler ]
-            |                                               |
-            V                                               |
-[ Persistence Layer (JPA, Specifications) ]                 |
-            |                                               V
-            |                              [ Infrastructure (External API Clients) ]
-            V                                               |
-      [ PostgreSQL ] <--------------------------------------+
+[ Clients ] -> [ REST Controller ] -> [ Service API ] -> [ JPA/PostgreSQL ]
+                                            ^
+                                            |
+                                    [ Sync Scheduler ] -> [ Provider Clients ]
 ```
 
-### Key Components
--   **API Layer**: Handles HTTP requests, validation, and mapping between internal entities and DTOs.
--   **Service Layer**: Implements core business logic, including a dynamic search system and a scheduler for data synchronization.
--   **Infrastructure**: Manages external communications (Rest Clients) and persistence details.
--   **Scheduler**: An automated task that pulls data from multiple providers periodically.
+*   **Controller Layer:** Decouples the internal model from the external API using DTOs and Mappers.
+*   **Service Layer:** Handles search logic and the idempotent synchronization process.
+*   **Infrastructure:** Manages communication with Provider A and Provider B, along with persistence details.
 
 ---
 
-## 🛠️ Technical Decisions & Justification
+## Technical Decisions & Approach
 
-### 1. Filtering Strategy: JPA Specifications
-We chose **JPA Specifications (Criteria API)** for the `/products` search endpoint.
-*   **Why?** Unlike static repository methods (e.g., `findByProviderAndMinRating...`), Specifications allow us to build dynamic queries based on which parameters are actually provided by the client.
-*   **Benefit:** It reduces code duplication and makes the filtering logic highly extensible without bloating the Repository interface.
+### Dynamic Filtering with JPA Specifications
+For the `/products` endpoint, I implemented **JPA Specifications (Criteria API)** instead of standard repository methods.
+*   **The Problem:** Standard `findBy...` methods grow exponentially when handling multiple optional filters (provider, price, rating, stock).
+*   **The Solution:** Specifications allow building the query dynamically at runtime. This keeps the Repository interface clean and makes the filtering logic highly reusable and scalable.
 
-### 2. Parallel Synchronization with CompletableFuture
-The `InventorySyncScheduler` fetches data from multiple external providers in parallel.
-*   **Why?** Sequential fetching would be a bottleneck as the number of providers grows.
-*   **Benefit:** By using `CompletableFuture.supplyAsync()`, we minimize the total time the sync task takes, improving efficiency and resource utilization.
+### Parallel Synchronization via CompletableFuture
+The `InventorySyncScheduler` executes calls to external providers concurrently using `CompletableFuture`.
+*   **Rationale:** Since provider integrations are I/O bound (network calls), running them sequentially would significantly delay the sync cycle.
+*   **Resilience:** I implemented error boundaries for each provider. If one external API is down, the system logs the failure but continues to update data from the healthy providers, ensuring partial data availability.
 
-### 3. Graceful Degradation & Resilience
-If one external provider (e.g., Provider A) is down or returns an error, the sync process for other providers continues unaffected.
-*   **Why?** We shouldn't fail the entire synchronization just because one source is temporarily unavailable.
-*   **Benefit:** Ensures that the database stays as up-to-date as possible even during partial external outages.
-
-### 4. Idempotent Upsert Logic
-Synchronization uses an `externalId` (unique to the provider's product) to match records in our database.
-*   **Why?** To prevent duplicate entries during repeated sync cycles.
-*   **Benefit:** It ensures that existing products are updated with new prices, stock, or ratings, while new products are seamlessly inserted.
-
-### 5. Observability: Audit Logs
-The system explicitly logs warnings when products arrive with zero stock.
-*   **Why?** This provides immediate visibility into inventory gaps that might require business attention.
-*   **Benefit:** Simplifies monitoring and troubleshooting through centralized logs.
+### Data Integrity & Idempotency (Upsert)
+Each product is tracked through an `externalId` unique to the provider. 
+*   **Mechanism:** During each sync cycle, the service performs an **upsert** logic: it updates existing records (price, stock, etc.) and inserts new ones. This prevents duplicate entries and ensures that the local database is always a consistent reflection of the providers' state.
 
 ---
 
-## 📋 API Endpoints
+## Future Improvements & Trade-offs
 
--   `GET /products`: Search and filter inventory.
-    -   Params: `provider`, `minRating`, `maxPrice`, `minStock`.
--   `PATCH /products/restock-zeros`: Bulk update products with 0 stock to a new value.
--   `PATCH /products/reset-stock`: Emergency reset of all stock to 0.
+Given the scope of this evaluation, I made certain trade-offs that would be addressed in a production-ready environment:
+
+*   **Pagination:** Currently, the search returns a full list. Adding `Pageable` support in the controller and repository would be a priority for handling large datasets.
+*   **Advanced Resilience:** While basic error handling is in place, implementing a Circuit Breaker (e.g., Resilience4j) would prevent the system from repeatedly calling a failing provider during prolonged outages.
+*   **Integration Testing:** I would add Testcontainers to verify the PostgreSQL interaction and the upsert logic in a real database environment.
