@@ -11,6 +11,9 @@ To run the application and its PostgreSQL database locally:
 1. **Build the application JAR:**
    ```bash
    ./mvnw clean package -DskipTests
+
+   Note: use .\mvnw.cmd clean package -DskipTests in Windows
+   
    ```
 2. **Start the containers:**
    ```bash
