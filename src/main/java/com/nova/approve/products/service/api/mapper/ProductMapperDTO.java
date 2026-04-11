@@ -17,7 +17,8 @@ public class ProductMapperDTO {
                     p.getStock(),
                     p.getProvider(),
                     p.getCategory(),
-                    p.getBrand()
+                    p.getBrand(),
+                    p.getImage()
             );
         }
 }

@@ -9,5 +9,6 @@ public record ProductResponseDTO(
         Integer stock,
         String provider,
         String category,
-        String brand
+        String brand,
+        String image
 ) {}

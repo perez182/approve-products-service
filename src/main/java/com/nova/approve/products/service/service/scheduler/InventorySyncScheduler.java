@@ -24,7 +24,7 @@ public class InventorySyncScheduler {
     private final List<ProductProviderSync> providers;
     private final ProductRepository productRepository;
 
-    @Scheduled(fixedDelay = 600000)
+    @Scheduled(fixedDelay = 200000)
     public void syncInventory() {
         log.info("Execute Cron save products");
 
@@ -92,7 +92,7 @@ public class InventorySyncScheduler {
 
     private Product mergeProduct(Product incoming, Map<String, Product> existingMap) {
 
-            Product existing = existingMap.get(incoming.getId());
+            Product existing = existingMap.get(incoming.getExternalId());
 
             if (existing == null) {
                 return incoming; 
